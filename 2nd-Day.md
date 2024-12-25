@@ -1,4 +1,4 @@
-<<<<<<< Tabnine <<<<<<<
+
 # Answers to the Assignments of Michael Kedey's repo https://github.com/michaelkedey/practice-devops-assignments
 
  ## assignment_002
