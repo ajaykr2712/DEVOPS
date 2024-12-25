@@ -1,69 +1,30 @@
+<<<<<<< Tabnine <<<<<<<
+# Answers to the Assignments of Michael Kedey's repo https://github.com/michaelkedey/practice-devops-assignments
 
-### Daily Log
-#### Day 2 - August 13, 2024
+ ## assignment_002
 
-**Today's Focus:** Advanced Data Wrangling with Pandas
+ 1. Displays the file system
+ 2. cd
+ 3. In Linux, what is the purpose of the chmod command?:  Change mode of a file
+ 4. find
+ 5. print file content
+ 6. df in linux: Display file content
+ 7. tail
+ 8. uname: Display system name
+ 9. Kill the process
+ 10. whoami: Display current username
+ 11. Root User vs Regular User: A root user has access to all files and system settings, while a regular user has restricted access.
+ 12. cd ->  Changes the current directory.
+ 13. SUDO: Temporarily allows a regular user to execute a command with root privileges.
+ 14. Basic File Permissions in Linux: Read permissions, Write permissions, Execute permissions
+ 15. Current Directory
+ 16.  Command vs Script:  Commands are single lines, scripts are multiple lines.
+ 17. Advantage of CLI against GUI: a) The command line is faster and more efficient for experienced users.
+b) The command line offers more precise control over system actions.
+c) The command line is less resource-intensive.
 
-**Resources Used:**
-- 📖 *Python for Data Analysis* by Wes McKinney
-- 🌐 [Real Python - Pandas GroupBy](https://realpython.com/pandas-groupby/)
-- 🌐 [Kaggle - Data Cleaning Challenge](https://www.kaggle.com/competitions/data-cleaning-challenge)
+18. /  the symbol used to represent root in a Linux file path
+19. mv -> Renames a file or directory
+20. NANO -> A text editor
 
-**Activities:**
-- 📝 Deep dive into `groupby`, merging, and joining operations.
-- 📌 Explored reshaping and pivoting data for advanced analysis.
-- 🔗 [Pandas GroupBy Documentation](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html)
-- 🔗 [Pandas Merging, Joining, and Concatenating](https://pandas.pydata.org/pandas-docs/stable/user_guide/merging.html)
-
-**Detailed Notes:**
-
-📝 **GroupBy and Aggregation:**
-- **Purpose:** Split data into groups based on some criteria and perform computations on each group independently.
-- **Example:**
-    ```python
-    df.groupby('Category').sum()
-    ```
-
-📝 **Merging and Joining:**
-- **Merging:** Combine datasets based on common columns or indices.
-- **Joining:** A method similar to SQL joins (left, right, inner, outer).
-- **Example:**
-    ```python
-    pd.merge(df1, df2, on='Key')
-    ```
-
-📝 **Reshaping with `melt` and `pivot`:**
-- **Melt:** Unpivot a DataFrame from wide to long format.
-- **Pivot:** Reshape data to create a pivot table.
-- **Example:**
-    ```python
-    df.melt(id_vars=['Category'], value_vars=['Value1', 'Value2'])
-    df.pivot(index='Category', columns='Type', values='Value')
-    ```
-
-**Code Snippet:**
-```python
-import pandas as pd
-
-# Sample data for merging
-df1 = pd.DataFrame({'Key': ['A', 'B', 'C'], 'Value1': [1, 2, 3]})
-df2 = pd.DataFrame({'Key': ['A', 'B', 'D'], 'Value2': [4, 5, 6]})
-
-# Merging dataframes on 'Key'
-merged_df = pd.merge(df1, df2, on='Key', how='outer')
-
-# GroupBy operation
-grouped_df = merged_df.groupby('Key').sum()
-
-# Reshaping with melt
-melted_df = pd.melt(merged_df, id_vars=['Key'], value_vars=['Value1', 'Value2'])
-```
-
-**Reflections:**
-- 🤔 Advanced data wrangling techniques like `groupby`, merging, and pivoting are essential for handling complex datasets.
-- 🚀 Mastery of these operations allows for flexible and powerful data manipulation.
-
-**Next Steps:**
-- 🔜 Practice these operations on a real-world dataset.
-- 🔜 Explore more advanced topics like multi-indexing and time-series manipulation.
-
+## HAPPY LEARNING
