@@ -126,5 +126,4 @@ pwd               # Check current location
 cd ~ 
 
 ```
-
 ## Happy Learning
