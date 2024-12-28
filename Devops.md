@@ -84,3 +84,13 @@
 ---
 
 By following this structured cycle and mastering the tools, you can excel in DevOps and build robust, scalable, and efficient systems
+
+
+
+Building the real time solutions to the real world problems like
+# Issue: Title: Set Up a CI/CD Pipeline Using GitHub Actions 
+Use a sample application (e.g., Node.js or Python).
+Install dependencies.
+Run unit tests.
+Build the application.
+Trigger the workflow on push to the main branch.
