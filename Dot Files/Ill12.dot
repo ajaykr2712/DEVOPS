@@ -1,0 +1,16 @@
+graph architecture {
+rankdir = LR
+node[shape = circle,  width=1.6, style=filled,fillcolor="#D14D28", fontcolor=white]
+//shape = record
+edge [dir=forward]
+
+Node3 -- Node4
+Node1 -- Node2
+Node2 -- Node3
+
+Node1[label=<<FONT POINT-SIZE="20">Provision<br/>Server v1</FONT>>]
+Node2[label=<<FONT POINT-SIZE="20">Provision<br/>Server v2</FONT>>]
+Node3[label=<<FONT POINT-SIZE="20">Remove<br/>Server v1</FONT>>]
+Node4[label=<<FONT POINT-SIZE="20">..<br/></FONT>>]
+
+}
