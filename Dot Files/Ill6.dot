@@ -1,0 +1,21 @@
+graph architecture {
+rankdir = LR
+node[shape = circle,  width=1, style=filled,color="#D14D28", fontcolor=white]
+//shape = record
+//fillcolor="#59C8DE"
+edge [dir=forward]
+
+Node3 -- Node4
+Node4 -- Node5
+Node5 -- Node6
+Node1 -- Node2
+Node2 -- Node3
+
+Node1[label=<Vision>]
+Node2[label=<Iteration 1>]
+Node3[label=<Iteration 2>]
+Node4[label=<...>]
+Node5[label=<Iteration n>]
+Node6[label=<Product>]
+
+}

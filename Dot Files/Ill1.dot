@@ -1,0 +1,20 @@
+graph architecture {
+
+node[style=filled,color="#59C8DE"]
+//node [style=filled,color="#D14D28", fontcolor=white];
+rankdir = LR
+node[shape=record, width=1.6]
+
+
+ParentNode1 -- ChildNode1
+ChildNode1 -- ChildNode2
+ChildNode1 -- ChildNode3
+ChildNode1 -- ChildNode4
+
+ParentNode1[label=<Configuration <BR/>and Scripts>]
+ChildNode1[label=<Ansible>];
+ChildNode2[label=<Server 1>];
+ChildNode3[label=<Server 2>];
+ChildNode4[label=<Server 3>];
+
+}
