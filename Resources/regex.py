@@ -2,9 +2,10 @@ import re
 
 # 1. Basic Pattern Matching
 text = "Hello, my email is john@example.com"
-email_pattern = r'\b[\w\.-]+@[\w\.-]+\.\w+\b'
-email = re.search(email_pattern, text)
-print(email.group())  # Output: john@example.com
+email_pattern = r'\b[\w.-]+@[\w.-]+\.\w+\b'  # Simplified \.- to .-
+email_match = re.search(email_pattern, text)
+if email_match:
+    print(email_match.group())  # Output: john@example.com
 
 # 2. Phone Number Matching
 phone_text = "Call me at 123-456-7890 or (987) 654-3210"
@@ -14,25 +15,25 @@ print(phones)  # Output: ['123-456-7890', '(987) 654-3210']
 
 # 3. Text Replacement
 text = "I love cats, cats are great"
-new_text = re.sub(r'cats', 'dogs', text)
+new_text = re.sub(r'cats', 'dogs', text, flags=re.IGNORECASE)  # Added flags for case insensitivity
 print(new_text)  # Output: I love dogs, dogs are great
 
 # 4. Validating Username
 def is_valid_username(username):
-    pattern = r'^[a-zA-Z0-9_]{3,16}$'
-    return bool(re.match(pattern, username))
+    return bool(re.match(r'^[a-zA-Z0-9_]{3,16}$', username))
 
 print(is_valid_username("john_doe123"))  # Output: True
-print(is_valid_username("jo"))           # Output: False
+print(is_valid_username("jo"))          # Output: False
 
 # 5. Extracting URLs
 text = "Visit https://www.example.com and http://test.com"
-urls = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*', text)
+url_pattern = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*'
+urls = re.findall(url_pattern, text)
 print(urls)  # Output: ['https://www.example.com', 'http://test.com']
 
 # 6. Split String by Multiple Delimiters
 text = "apple,banana;orange|grape"
-items = re.split(r'[,;|]', text)
+items = re.split(r'[,\|;]', text)  # Adjusted pattern for clarity
 print(items)  # Output: ['apple', 'banana', 'orange', 'grape']
 
 # 7. Password Validation
@@ -53,10 +54,11 @@ print(is_valid_date("13/45/2023"))  # Output: False
 
 # 9. Extracting Words with Specific Pattern
 text = "Python3 is great123 for coding456"
-words = re.findall(r'\b\w+\d+\b', text)
+pattern = r'\b\w+\d+\b'  # Matches words ending with digits
+words = re.findall(pattern, text)
 print(words)  # Output: ['Python3', 'great123', 'coding456']
 
 # 10. HTML Tag Removal
 html = "<p>This is <b>bold</b> text</p>"
-clean_text = re.sub(r'<[^>]+>', '', html)
+clean_text = re.sub(r'<[^>]+>', '', html)  # Removes all HTML tags
 print(clean_text)  # Output: This is bold text
