@@ -54,4 +54,4 @@ Here are some important Python keywords:
 
 25. **global**: It is used to declare a global variable within a function's scope.
 
-26. **nonlocal**: It is used to declare a variable as nonlocal, which allows modifying a variable in an enclosing (but non-global) scope.
+26. **nonlocal**: It is used to declare a variable as nonlocal, which allows modifying a variable in an enclosing (but non-global) scope
