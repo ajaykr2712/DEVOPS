@@ -1,0 +1,29 @@
+
+---
+
+### **Markdown File 2: YAML Assignment Questions**
+
+``` 
+# YAML Assignment Questions
+
+## Question 1: Kubernetes Deployment
+Write a YAML configuration for a Kubernetes Deployment with:
+- 3 replicas.
+- An Nginx container with the `latest` tag.
+- Port 80 exposed.
+
+---
+
+## Question 2: Ansible Playbook
+Create an Ansible playbook to:
+- Install Apache.
+- Start and enable the Apache service.
+
+---
+
+## Question 3: GitHub Actions Workflow
+Design a GitHub Actions workflow to:
+- Run on `push` events.
+- Use Node.js 16.
+- Install dependencies and run tests.
+```
