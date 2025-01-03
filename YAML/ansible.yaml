@@ -1,0 +1,9 @@
+# YAML defines playbooks for automation.
+
+- name: Install packages
+  hosts: all
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
