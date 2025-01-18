@@ -12,6 +12,7 @@
 - Distributed tracing
 - Chaos engineering integration
 
+```
 # Sample Kubernetes Configuration
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +23,7 @@ spec:
   selector:
     matchLabels:
       app: microservice
+```
 
 
 
