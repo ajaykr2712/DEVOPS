@@ -19,21 +19,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Verify Directory Structure
+    - name: Debug Dockerfile
       run: |
+        echo "Current directory:"
+        pwd
+        echo "Directory contents:"
         ls -la Project_Implementation/cicd-pipeline-framework/
-        if [ ! -f "Project_Implementation/cicd-pipeline-framework/Dockerfile" ]; then
-          echo "Error: Dockerfile not found!"
-          exit 1
-        fi
+        echo "Dockerfile contents:"
+        cat Project_Implementation/cicd-pipeline-framework/Dockerfile
     
-    # Build CICD Pipeline Framework Image
     - name: Build CICD Pipeline Framework
       working-directory: Project_Implementation/cicd-pipeline-framework
       run: |
-        echo "Building Docker image..."
-        docker build . --file Dockerfile --tag cicd-pipeline:$(date +%s)
-      
+        # Ensure proper line endings
+        dos2unix Dockerfile
+        # Build the image
+        docker build -t cicd-pipeline:latest .
+
     # You can add more builds for other projects
     # - name: Build Microservices Platform
     #   working-directory: Project_Implementation/Microservices_platform
