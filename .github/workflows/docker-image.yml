@@ -14,5 +14,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    
+    # Build CICD Pipeline Framework Image
+    - name: Build CICD Pipeline Framework
+      working-directory: Project_Implementation/cicd-pipeline-framework
+      run: docker build . --file Dockerfile --tag cicd-pipeline:$(date +%s)
+      
+    # You can add more builds for other projects
+    # - name: Build Microservices Platform
+    #   working-directory: Project_Implementation/Microservices_platform
+    #   run: docker build . --file Dockerfile --tag microservices:$(date +%s)
