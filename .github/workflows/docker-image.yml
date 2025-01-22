@@ -3,8 +3,12 @@ name: Docker Image CI
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'Project_Implementation/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'Project_Implementation/**'
 
 jobs:
 
@@ -15,10 +19,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Verify Directory Structure
+      run: |
+        ls -la Project_Implementation/cicd-pipeline-framework/
+        if [ ! -f "Project_Implementation/cicd-pipeline-framework/Dockerfile" ]; then
+          echo "Error: Dockerfile not found!"
+          exit 1
+        fi
+    
     # Build CICD Pipeline Framework Image
     - name: Build CICD Pipeline Framework
       working-directory: Project_Implementation/cicd-pipeline-framework
-      run: docker build . --file Dockerfile --tag cicd-pipeline:$(date +%s)
+      run: |
+        echo "Building Docker image..."
+        docker build . --file Dockerfile --tag cicd-pipeline:$(date +%s)
       
     # You can add more builds for other projects
     # - name: Build Microservices Platform
