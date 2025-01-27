@@ -10,11 +10,7 @@
    - C) Docker
    - D) Kubernetes
 
-4. **Which of the following is NOT a benefit of using containers?**
-   - A) Portability
-   - B) Isolation
-   - C) Increased resource consumption
-   - D) Scalability
+
 
 
 
