@@ -27,8 +27,3 @@
    - C) Increased resource consumption
    - D) Scalability
 
-5. **What does CI/CD stand for?**
-   - A) Continuous Integration/Continuous Deployment
-   - B) Continuous Improvement/Continuous Development
-   - C) Continuous Integration/Continuous Delivery
-   - D) Both A and C
