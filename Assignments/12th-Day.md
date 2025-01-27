@@ -15,9 +15,5 @@
    - C) Manual Testing
    - D) Isolated Development Environments
 
-3. **What tool is commonly used for Continuous Integration?**
-   - A) Git
-   - B) Jenkins
-   - C) Docker
-   - D) Kubernetes
+
 
