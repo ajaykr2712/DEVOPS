@@ -49,7 +49,7 @@ File: Devops.md
 ## 3. **Configuration Management** 🛠️
 - **Ansible**: Automates provisioning and configuration.
 - **Chef**: Manages infrastructure using code.
-- **Puppet**: Ensures system configurations are consistent.
+- **Puppet**: Ensures system configurations are consistent..
 
 ## 4. **Containerization and Orchestration** 🐳
 - **Docker**: Containerizes applications for portability.
