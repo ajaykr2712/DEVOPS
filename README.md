@@ -43,3 +43,15 @@
 | 🔧 Editors     | Neovim + Telescope + LSP (gopls, tf-ls, k8s schema validation)       |
 
 ## 🌟 Key Features
+
+
+
+
+## 🧭 Learning Modules
+1. [Vim DevOps Setup](Vim/01_Setup.md) - 🛠️ Configuring your ultimate editor
+2. [Cloud-Native Patterns](cloud/README.md) - ☁️ Multi-cloud architecture
+3. [Security Automation](security/README.md) - 🔐 Policy-as-Code implementation
+4. [Observability](monitoring/README.md) - 📊 Metrics/Logs/Tracing pipeline
+5. [Production Recipes](recipes/README.md) - 🧑🍳 Battle-tested patterns
+
+## 🤝 Contributing
