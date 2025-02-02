@@ -14,6 +14,8 @@ knowledge
 for a DevOps engineer. You will be learning Cloud basics and gaining hands-on
 experience working with remote VMs in the Cloud, as well as artifact repositories with Nexus and containerization with Docker.
 
+
+
 # Level 3 - DevOps Core
 
 ### Here we take your skills to an advanced level and speed up your career growth.
@@ -21,9 +23,17 @@ You will be learning CI/CD pipelines, container orchestration with K8s, complex
 cloud infrastructure with AWS, K8s on AWS with EKS and building multiple real
 life capstone projects with all of the tools you have learned in each of the previous modules.
 
+Real-world Implementation Flow:
+```
 
-
-
+Developer pushes code → Triggers CI pipeline
+Build Docker image → Scan for vulnerabilities
+Deploy to EKS staging → Run automated tests
+4. Promote to production → Blue/Green deployment
+Monitor with Prometheus → Auto-scale based on metrics
+6. Infrastructure changes → Terraform plan/apply
+Configuration updates → Ansible playbooks
+```
 # Level 4 - DevOps Advanced
 
 ### Elevate to an expert level by mastering 4 tools of automating every part of your
