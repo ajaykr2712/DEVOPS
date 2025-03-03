@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 7: Container Registry and Security Platform
+## Project 7: Container Registry and Security Platform(C)
 
 **Complexity Level: Expert**
 

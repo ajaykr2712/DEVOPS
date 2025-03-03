@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 4: Infrastructure Automation Platform
+## Project 4: Infrastructure Automation Platform (B)
 
 **Complexity Level: Expert**
 
