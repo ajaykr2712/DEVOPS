@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 3: Cloud-Native Monitoring System
+## Project 3: Cloud-Native Monitoring System (E)
 
 **Complexity Level: Expert**
 
