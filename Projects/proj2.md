@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 2: CI/CD Pipeline Automation Framework
+## Project 1: CI/CD Pipeline Automation Framework (A)
 
 **Complexity Level: Advanced**
 
