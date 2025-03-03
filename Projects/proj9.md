@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 9: GitOps Infrastructure Automation Framework
+## Project 9: GitOps Infrastructure Automation Framework(H)
 
 **Complexity Level: Expert**
 
