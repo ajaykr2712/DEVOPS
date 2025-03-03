@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 8: Service Mesh Implementation
+## Project 8: Service Mesh Implementation(G)
 
 **Complexity Level: Expert**
 
