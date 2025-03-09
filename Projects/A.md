@@ -65,7 +65,7 @@ pipeline {
 ```mermaid
 graph TD;
     A[Code Repository] -->|Push Code| B[CI/CD Pipeline]
-    B --> C[Infrastructure as Code (IAC)]
+    B --> C[Infrastructure as Code IAC]
     B --> D[Automated Testing]
     B --> E[Security Scanning]
     C --> F[Multi-Cloud Deployment]
