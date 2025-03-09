@@ -29,3 +29,19 @@ ENTRYPOINT ["/app/start.sh"]
 - Policy enforcement
 - Vulnerability management
 - Access control
+
+# Container Registry and Security Platform (C) - High-Level Design
+
+```mermaid
+graph TD;
+    A[Container Image Upload] -->|Push to Registry| B[Registry Management]
+    B --> C[Image Scanning]
+    C -->|Pass| D[Image Signing]
+    C -->|Fail| E[Vulnerability Tracking]
+    E -->|Log Issues| F[Policy Enforcement]
+    D --> G[Policy Enforcement]
+    F -->|Block Deployment| H[Security Alert]
+    G -->|Pass| I[Secure Image Deployment]
+    G -->|Fail| F
+    I --> J[Continuous Monitoring]
+    J --> K[Compliance & Audit Reporting]
