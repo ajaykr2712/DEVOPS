@@ -42,3 +42,24 @@ spec:
 - Secret management
 - Access control
 - Threat detection
+
+
+# Project 5: Security Automation Framework (F) - High-Level Design
+
+```mermaid
+graph TD;
+    A[Vulnerability Scanning] -->|Identify Risks| B[Threat Detection]
+    B -->|Analyze Threats| C[Incident Response]
+    C -->|Mitigate| D[Automated Remediation]
+    D --> E[Security Posture Management]
+    A --> F[Compliance Monitoring]
+    F -->|Enforce Policies| G[Automated Policy Enforcement]
+    G --> H[Security Event Monitoring]
+    H -->|Log & Alert| I[Security Reporting & Analytics]
+    E --> J[Security Automation Framework]
+    J --> K[Secret Management]
+    K --> L[Access Control]
+    I --> M[DevOps Culture & Best Practices]
+    L --> N[Continuous Security Improvement]
+    N --> O[Deployment Success]
+    O --> P[Feedback & Optimization]
