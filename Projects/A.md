@@ -59,7 +59,7 @@ pipeline {
 - DevOps culture and practices
 
 
-
+## High Level Representation of the project that aligns with the mermaid chart shown below
 # Enterprise-Grade CI/CD Framework - High-Level Design
 
 ```mermaid
@@ -82,3 +82,5 @@ graph TD;
     L --> M[Disaster Recovery & Backup]
     M --> N[Deployment Success]
     N --> O[Feedback Loop to Development]
+
+
