@@ -41,3 +41,26 @@ groups:
 - Log analysis
 - Performance optimization
 - Automated incident response
+
+
+# Project 3: Cloud-Native Monitoring System (E) - High-Level Design
+
+```mermaid
+graph TD;
+    A[Multi-Cloud Monitoring] -->|Collect Metrics| B[Metrics Collection]
+    B --> C[Log Analysis]
+    B --> D[Alert Correlation]
+    C --> E[Security Scanning]
+    D --> F[Automated Incident Response]
+    E --> G[Infrastructure as Code (IaC)]
+    F --> H[Release Management]
+    G --> I[Monitoring & Logging]
+    H --> J[Performance Optimization]
+    I --> K[Scalability & Fault Tolerance]
+    J --> L[Cost Optimization]
+    K --> M[Disaster Recovery & Backup]
+    L --> N[Containerization & Virtualization]
+    M --> O[Cloud Native Architecture]
+    N --> P[DevOps Culture & Best Practices]
+    O --> Q[Deployment Success]
+    Q --> R[Continuous Improvement & Feedback Loop]
