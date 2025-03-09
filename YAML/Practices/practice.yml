@@ -1,8 +1,0 @@
-default_settings: &defaults
-  retries: 3
-  timeout: 30
-
-server1:
-  <<: *defaults
-  url: http://server1.example.com
-
