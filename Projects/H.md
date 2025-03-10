@@ -40,6 +40,7 @@ spec:
 # Project 6: GitOps Platform(H) - High-Level Design
 
 ```mermaid
+graph TD;
     A[Advanced DevOps Engineering Projects Portfolio] --> B[Project 6: GitOps Platform - G]
 
     B --> C[Declarative Infrastructure]
