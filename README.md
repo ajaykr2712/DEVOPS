@@ -2,9 +2,6 @@
 #BuildingTomorrowsInfrastructure
 
 ![Go DevOps](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)
-![Vim](https://img.shields.io/badge/Neovim-0.9+-57A143?logo=neovim&logoColor=white)
-
-**Transform from Go Developer to Cloud-Native DevOps Engineer** using production-grade practices and Vim superpowers! 💻⚡
 
 ## 📚 Learning Path Structure
 
