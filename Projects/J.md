@@ -60,7 +60,7 @@ graph TD;
     N --> P[Region: us-central1]
 
     K --> Q[Azure Provider]
-    Q --> R[Features {}]
+    Q --> R[Features ]
 
     B --> S[Key Learning Objectives]
 
