@@ -1,6 +1,6 @@
 # Advanced DevOps Engineering Projects Portfolio
 
-## Project 6: GitOps Platform(G)
+## Project 6: GitOps Platform(H)
 
 **Complexity Level: Expert**
 
