@@ -11,7 +11,7 @@
 - Policy enforcement
 - Image signing
 - Registry management
-- Vulnerability tracking
+- Vulnerability tracking..
 
 ```
 # Secure Dockerfile Example
