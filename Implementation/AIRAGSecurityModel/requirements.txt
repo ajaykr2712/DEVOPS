@@ -1,0 +1,9 @@
+# Python dependencies for AIRAGSecurityModel
+# Add your project dependencies here
+# Example:
+# flask
+# numpy
+# pandas
+# scikit-learn
+# tensorflow
+# torch

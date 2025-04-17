@@ -1,0 +1,31 @@
+# Sample CI/CD Pipeline Definition (YAML)
+# This is a placeholder file. Replace with your actual pipeline configuration.
+
+stages:
+  - build
+  - test
+  - deploy
+
+build_job:
+  stage: build
+  script:
+    - echo "Building the project..."
+    # Add build commands here
+    - ./scripts/build.sh
+
+test_job:
+  stage: test
+  script:
+    - echo "Running tests..."
+    # Add test commands here
+    - ./scripts/test.sh
+
+deploy_job:
+  stage: deploy
+  script:
+    - echo "Deploying the project..."
+    # Add deployment commands here
+    - ./scripts/deploy.sh
+  # Example: only deploy on main branch
+  # only:
+  #   - main
