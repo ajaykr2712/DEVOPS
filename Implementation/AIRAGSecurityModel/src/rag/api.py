@@ -6,6 +6,8 @@ from typing import List
 from src.rag.data_ingestion import DataIngestion
 from src.rag.retrieval import Retriever
 from src.rag.generation import Generator
+from src.rag.dashboard import router as dashboard_router
+from src.rag.auth import get_current_user
 import os
 import logging
 
@@ -40,7 +42,8 @@ class FeedbackRequest(BaseModel):
     answer: str
     feedback: str
 
-@router.post("/threat-detect")
+router.include_router(dashboard_router)
+@router.post("/threat-detect", dependencies=[Depends(get_current_user)])
 def detect_threat(req: ThreatDetectionRequest):
     try:
         # Placeholder for advanced threat detection logic
@@ -53,7 +56,7 @@ def detect_threat(req: ThreatDetectionRequest):
         logger.error(f"Threat detection error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/feedback")
+@router.post("/feedback", dependencies=[Depends(get_current_user)])
 def submit_feedback(req: FeedbackRequest):
     try:
         # Log feedback for monitoring and future active learning
@@ -64,7 +67,7 @@ def submit_feedback(req: FeedbackRequest):
         logger.error(f"Feedback submission error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/ingest")
+@router.post("/ingest", dependencies=[Depends(get_current_user)])
 def ingest_data(req: IngestRequest):
     try:
         if not req.filename or not req.filename.endswith('.csv'):
@@ -79,7 +82,7 @@ def ingest_data(req: IngestRequest):
         logger.error(f"Ingestion error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/search")
+@router.post("/search", dependencies=[Depends(get_current_user)])
 def search(req: SearchRequest):
     try:
         if not req.query or not isinstance(req.top_k, int) or req.top_k <= 0:
@@ -92,7 +95,7 @@ def search(req: SearchRequest):
         logger.error(f"Search error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/generate")
+@router.post("/generate", dependencies=[Depends(get_current_user)])
 def generate(req: GenerateRequest):
     try:
         if not req.query or not isinstance(req.top_k, int) or req.top_k <= 0 or not isinstance(req.max_length, int) or req.max_length <= 0:
