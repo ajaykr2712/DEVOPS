@@ -23,5 +23,9 @@ COPY data ./data
 # Expose API port
 EXPOSE 8000
 
+# Security: Use a non-root user
+RUN useradd -m airaguser && chown -R airaguser /app
+USER airaguser
+
 # Run the API
 CMD ["python", "-m", "src.main"]

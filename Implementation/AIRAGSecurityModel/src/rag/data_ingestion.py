@@ -5,6 +5,10 @@ import pandas as pd
 from typing import List, Dict, Any
 
 class DataIngestion:
+    """
+    Handles loading, preprocessing, and normalization of security datasets for RAG pipeline.
+    Expected CSV format: Each row represents a security incident or document with relevant fields.
+    """
     def __init__(self, data_dir: str):
         self.data_dir = data_dir
 

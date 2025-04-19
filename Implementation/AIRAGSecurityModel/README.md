@@ -13,4 +13,31 @@ This project implements an AI-Powered Retrieval-Augmented Generation (RAG) model
 
 ## Getting Started
 
-(Instructions on setting up the environment, data, and running the model will go here.)
+1. Clone the repository:
+   ```bash
+   git clone <repo-url>
+   cd AIRAGSecurityModel
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the API server:
+   ```bash
+   python -m src.main
+   ```
+
+## Usage Examples
+
+- Ingest data:
+  ```bash
+  curl -X POST "http://localhost:8000/ingest" -H "Content-Type: application/json" -d '{"filename": "your_data.csv"}'
+  ```
+- Search documents:
+  ```bash
+  curl -X POST "http://localhost:8000/search" -H "Content-Type: application/json" -d '{"query": "malware", "top_k": 3}'
+  ```
+- Generate answer:
+  ```bash
+  curl -X POST "http://localhost:8000/generate" -H "Content-Type: application/json" -d '{"query": "How to detect phishing?", "top_k": 2, "max_length": 64}'
+  ```

@@ -12,5 +12,6 @@ def fetch_threat_intel_indicators() -> List[str]:
         indicators = ["malicious.com", "badip.example", "trojan.exe"]
         return indicators
     except Exception as e:
-        # Log error in production
+        import logging
+        logging.error(f"Threat intel fetch error: {e}")
         return []

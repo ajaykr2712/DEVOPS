@@ -7,6 +7,10 @@ from sentence_transformers import SentenceTransformer
 from typing import List, Tuple
 
 class Retriever:
+    """
+    Implements vector-based semantic retrieval using FAISS and sentence-transformers.
+    If index_path is provided, the FAISS index will be saved/loaded from disk for persistence.
+    """
     def __init__(self, model_name: str = "all-MiniLM-L6-v2", index_path: str = None):
         self.model = SentenceTransformer(model_name)
         self.index = None
