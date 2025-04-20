@@ -1,11 +1,11 @@
 # Expert-level Python dependencies for AIRAGSecurityModel
-fastapi==0.110.0
-uvicorn[standard]==0.29.0
-pandas==2.2.2
-sentence-transformers==2.6.1
-faiss-cpu==1.7.4
-transformers==4.40.2
-scikit-learn==1.4.2
-python-dotenv==1.0.1
-pytest==8.1.1
-httpx==0.27.0
+fastapi==0.110.0  # Web API framework
+uvicorn[standard]==0.29.0  # ASGI server for FastAPI
+pandas==2.2.2  # Data manipulation and CSV handling
+sentence-transformers==2.6.1  # Embedding models for semantic search
+faiss-cpu==1.7.4  # Vector similarity search
+transformers==4.40.2  # Large language models
+scikit-learn==1.4.2  # Machine learning utilities
+python-dotenv==1.0.1  # Environment variable management
+pytest==8.1.1  # Testing framework
+httpx==0.27.0  # Async HTTP client for testing

@@ -61,9 +61,15 @@ This project implements an AI-Powered Retrieval-Augmented Generation (RAG) model
    python -m src.main
    ```
 3. **(Optional) Run tests:**
+   ## Testing
+   
+   To run the test suite and verify the RAG pipeline:
+   
    ```bash
    pytest tests/
    ```
+   
+   This will execute all tests, including pipeline and integration checks.
 4. **Docker deployment:**
    ```bash
    docker build -t airag-security-model .
