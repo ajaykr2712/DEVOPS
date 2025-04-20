@@ -18,6 +18,11 @@ def setup_and_teardown():
     if os.path.exists(test_data_path):
         os.remove(test_data_path)
 
+def test_search_no_results():
+    client = TestClient(app)
+    resp = client.post("/search", json={"query": "nonexistent threat", "top_k": 2})
+    assert resp.status_code == 200
+    assert resp.json()["results"] == []
 def test_ingest_search_generate():
     client = TestClient(app)
     # Ingest
@@ -32,3 +37,7 @@ def test_ingest_search_generate():
     resp = client.post("/generate", json={"query": "How to detect phishing?", "top_k": 2, "max_length": 32})
     assert resp.status_code == 200
     assert "answer" in resp.json()
+def test_ingest_invalid_file():
+    client = TestClient(app)
+    resp = client.post("/ingest", json={"filename": "does_not_exist.csv"})
+    assert resp.status_code == 400 or resp.status_code == 404

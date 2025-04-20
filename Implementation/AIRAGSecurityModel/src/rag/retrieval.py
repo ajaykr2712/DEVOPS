@@ -22,6 +22,11 @@ class Retriever:
         self.lock = threading.Lock()
 
     def build_index(self, documents: List[str]):
+        """
+        Builds a FAISS index from the provided documents.
+        Args:
+            documents (List[str]): List of document texts to index.
+        """
         with self.lock:
             self.documents = documents
             self.embeddings = self.model.encode(documents, show_progress_bar=True, batch_size=32, normalize_embeddings=True)
@@ -32,6 +37,11 @@ class Retriever:
                 faiss.write_index(self.index, self.index_path)
 
     def load_index(self):
+        """
+        Loads a FAISS index from disk if index_path is set.
+        Raises:
+            FileNotFoundError: If the index file does not exist.
+        """
         with self.lock:
             if self.index_path and os.path.exists(self.index_path):
                 self.index = faiss.read_index(self.index_path)
@@ -39,6 +49,16 @@ class Retriever:
                 raise FileNotFoundError("Index file not found.")
 
     def search(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
+        """
+        Searches the FAISS index for the most similar documents to the query.
+        Args:
+            query (str): Query string to search for.
+            top_k (int): Number of top results to return.
+        Returns:
+            List[Tuple[str, float]]: List of (document, score) tuples.
+        Raises:
+            RuntimeError: If the FAISS index is not initialized.
+        """
         if self.index is None:
             raise RuntimeError("FAISS index is not initialized. Call build_index or load_index first.")
         query_vec = self.model.encode([query], normalize_embeddings=True)

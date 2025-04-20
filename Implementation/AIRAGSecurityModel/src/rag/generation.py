@@ -38,6 +38,4 @@ class Generator:
         Returns:
             List[str]: List of generated answer texts.
         """
-        prompts = [f"Context: {c}\nQuery: {q}\nAnswer:" for c, q in zip(contexts, queries)]
-        results = self.generator(prompts, max_length=max_length, do_sample=True, top_p=0.95, num_return_sequences=1)
-        return [r["generated_text"].strip() for r in results]
+        return [self.generate(ctx, qry, max_length) for ctx, qry in zip(contexts, queries)]
