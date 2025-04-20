@@ -18,26 +18,25 @@ def setup_and_teardown():
     if os.path.exists(test_data_path):
         os.remove(test_data_path)
 
-def test_search_no_results():
+def api_post(client, endpoint, payload):
+    return client.post(endpoint, json=payload)
+
+@pytest.mark.parametrize("endpoint,payload,expected_status,expected_key,expected_value", [
+    ("/search", {"query": "nonexistent threat", "top_k": 2}, 200, "results", []),
+    ("/ingest", {"filename": "test_security_data.csv"}, 200, "status", "success"),
+    ("/search", {"query": "malware", "top_k": 2}, 200, "results", None),
+    ("/generate", {"query": "How to detect phishing?", "top_k": 2, "max_length": 32}, 200, "answer", None),
+    ("/ingest", {"filename": "does_not_exist.csv"}, None, None, None)
+])
+def test_api_calls(endpoint, payload, expected_status, expected_key, expected_value):
     client = TestClient(app)
-    resp = client.post("/search", json={"query": "nonexistent threat", "top_k": 2})
-    assert resp.status_code == 200
-    assert resp.json()["results"] == []
-def test_ingest_search_generate():
-    client = TestClient(app)
-    # Ingest
-    resp = client.post("/ingest", json={"filename": "test_security_data.csv"})
-    assert resp.status_code == 200
-    assert resp.json()["status"] == "success"
-    # Search
-    resp = client.post("/search", json={"query": "malware", "top_k": 2})
-    assert resp.status_code == 200
-    assert "results" in resp.json()
-    # Generate
-    resp = client.post("/generate", json={"query": "How to detect phishing?", "top_k": 2, "max_length": 32})
-    assert resp.status_code == 200
-    assert "answer" in resp.json()
-def test_ingest_invalid_file():
-    client = TestClient(app)
-    resp = client.post("/ingest", json={"filename": "does_not_exist.csv"})
-    assert resp.status_code == 400 or resp.status_code == 404
+    resp = api_post(client, endpoint, payload)
+    if endpoint == "/ingest" and payload["filename"] == "does_not_exist.csv":
+        assert resp.status_code == 400 or resp.status_code == 404
+    else:
+        assert resp.status_code == expected_status
+        if expected_key:
+            if expected_value is not None:
+                assert resp.json()[expected_key] == expected_value
+            else:
+                assert expected_key in resp.json()
