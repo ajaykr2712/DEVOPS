@@ -1,0 +1,411 @@
+# Enterprise Kubernetes Microservices Architecture
+# This YAML demonstrates advanced concepts including:
+# - Multi-tier application deployment
+# - ConfigMaps and Secrets management
+# - Resource limits and requests
+# - Probes for health monitoring
+# - Service mesh integration
+
+---
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: production
+  labels:
+    app: microservice-platform
+    environment: production
+data:
+  # Key-value pairs for application configuration
+  APP_MODE: "production"
+  LOG_LEVEL: "info"
+  CACHE_TTL: "3600"
+  API_VERSION: "v2"
+  FEATURE_FLAGS: |
+    {
+      "newUserOnboarding": true,
+      "enhancedAnalytics": true,
+      "betaFeatures": false,
+      "maintenanceMode": false
+    }
+  DATABASE_CONFIG: |
+    {
+      "primary": {
+        "host": "${DB_PRIMARY_HOST}",
+        "port": 5432,
+        "maxConnections": 100,
+        "idleTimeout": "30s"
+      },
+      "replicas": [
+        {
+          "host": "${DB_REPLICA_1_HOST}",
+          "port": 5432,
+          "readOnly": true
+        },
+        {
+          "host": "${DB_REPLICA_2_HOST}",
+          "port": 5432,
+          "readOnly": true
+        }
+      ]
+    }
+
+---
+# Frontend Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-service
+  namespace: production
+  labels:
+    app: microservice-platform
+    tier: frontend
+    environment: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: microservice-platform
+      tier: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: microservice-platform
+        tier: frontend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        istio.io/inject: "true"
+    spec:
+      containers:
+      - name: frontend
+        image: company-registry.io/frontend-service:v1.2.3
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        env:
+        - name: APP_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: APP_MODE
+        - name: API_GATEWAY_URL
+          value: "http://api-gateway.production.svc.cluster.local"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: LOG_LEVEL
+        envFrom:
+        - configMapRef:
+            name: frontend-specific-config
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        - name: cache-volume
+          mountPath: /app/cache
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app-config
+      - name: cache-volume
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: tier
+                  operator: In
+                  values:
+                  - frontend
+              topologyKey: "kubernetes.io/hostname"
+
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: production
+  labels:
+    app: microservice-platform
+    tier: frontend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:region:account:certificate/cert-id"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 443
+    targetPort: 8080
+    protocol: TCP
+    name: https
+  selector:
+    app: microservice-platform
+    tier: frontend
+
+---
+# API Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: production
+  labels:
+    app: microservice-platform
+    tier: gateway
+    environment: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: microservice-platform
+      tier: gateway
+  template:
+    metadata:
+      labels:
+        app: microservice-platform
+        tier: gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+      - name: api-gateway
+        image: company-registry.io/api-gateway:v2.1.0
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        env:
+        - name: SERVICE_DISCOVERY_URL
+          value: "http://service-registry:8500"
+        - name: RATE_LIMIT_PER_MINUTE
+          value: "1000"
+        - name: ENABLE_CIRCUIT_BREAKER
+          value: "true"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# API Gateway Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: production
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: microservice-platform
+    tier: gateway
+
+---
+# Backend Microservice (User Service) Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: production
+  labels:
+    app: microservice-platform
+    tier: backend
+    service: user-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: microservice-platform
+      tier: backend
+      service: user-service
+  template:
+    metadata:
+      labels:
+        app: microservice-platform
+        tier: backend
+        service: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: company-registry.io/user-service:v1.5.2
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        env:
+        - name: DB_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: user-service-db-credentials
+              key: connection-string
+        - name: FEATURE_FLAGS
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: FEATURE_FLAGS
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# User Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: production
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: microservice-platform
+    tier: backend
+    service: user-service
+
+---
+# Horizontal Pod Autoscaler for User Service
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: user-service-hpa
+  namespace: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: user-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+
+---
+# Network Policy for Backend Services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-network-policy
+  namespace: production
+spec:
+  podSelector:
+    matchLabels:
+      tier: backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          tier: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090
