@@ -172,3 +172,4 @@ ldd /usr/bin/ping                     # Note: Use otool -L on macOS
 which ping                            # Command location
 type ping                             # Command type
 command -v ping                       # Command verification
+# These are some of the best commands That I have shortlisted for now and the list goes on, till i have some of the on practice hands on labs on this
