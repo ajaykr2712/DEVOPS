@@ -1,0 +1,49 @@
+apiVersion: v2
+name: microservices-platform
+description: A comprehensive Helm chart for microservices platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - microservices
+  - kubernetes
+  - platform
+  - devops
+
+home: https://github.com/company/microservices-platform
+sources:
+  - https://github.com/company/microservices-platform
+
+maintainers:
+  - name: DevOps Team
+    email: devops@company.com
+
+dependencies:
+  - name: postgresql
+    version: 12.1.2
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: 17.4.3
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: prometheus
+    version: 15.18.0
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: monitoring.prometheus.enabled
+  - name: grafana
+    version: 6.44.11
+    repository: https://grafana.github.io/helm-charts
+    condition: monitoring.grafana.enabled
+
+annotations:
+  artifacthub.io/changes: |
+    - Added support for multiple environments
+    - Improved security configurations
+    - Enhanced monitoring and observability
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://docs.company.com/microservices-platform
+    - name: Support
+      url: https://support.company.com
