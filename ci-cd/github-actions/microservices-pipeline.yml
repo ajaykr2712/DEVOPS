@@ -1,0 +1,286 @@
+name: Microservices CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'services/**'
+      - 'infrastructure/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/**'
+      - 'infrastructure/**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Detect changed services
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.changes.outputs.services }}
+      infrastructure: ${{ steps.changes.outputs.infrastructure }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Detect changes
+        id: changes
+        run: |
+          # Detect changed services
+          CHANGED_SERVICES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^services/' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n")[:-1]')
+          echo "services=$CHANGED_SERVICES" >> $GITHUB_OUTPUT
+          
+          # Check if infrastructure changed
+          INFRA_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^infrastructure/' | wc -l)
+          echo "infrastructure=$([ $INFRA_CHANGED -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+
+  # Security and quality scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+
+  # Build and test services
+  build-services:
+    needs: [detect-changes, security-scan]
+    if: needs.detect-changes.outputs.services != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Run service tests
+        run: |
+          cd services/${{ matrix.service }}
+          if [ -f "docker-compose.test.yml" ]; then
+            docker-compose -f docker-compose.test.yml run --rm test
+          fi
+
+  # Infrastructure validation
+  infrastructure-validation:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.infrastructure == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+      
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive infrastructure/
+      
+      - name: Terraform Init
+        run: |
+          cd infrastructure/environments/staging
+          terraform init
+      
+      - name: Terraform Validate
+        run: |
+          cd infrastructure/environments/staging
+          terraform validate
+      
+      - name: Terraform Plan
+        run: |
+          cd infrastructure/environments/staging
+          terraform plan -out=tfplan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: infrastructure/environments/staging/tfplan
+
+  # Integration tests
+  integration-tests:
+    needs: [build-services, infrastructure-validation]
+    if: always() && (needs.build-services.result == 'success' || needs.build-services.result == 'skipped')
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run integration tests
+        run: |
+          # Set up test environment
+          docker-compose -f docker-compose.test.yml up -d
+          
+          # Wait for services to be ready
+          sleep 30
+          
+          # Run integration tests
+          docker-compose -f docker-compose.test.yml run --rm integration-tests
+          
+          # Cleanup
+          docker-compose -f docker-compose.test.yml down
+
+  # Deploy to staging
+  deploy-staging:
+    needs: [build-services, infrastructure-validation, integration-tests]
+    if: github.ref == 'refs/heads/develop' && success()
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name staging-cluster --region us-west-2
+      
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install microservices-platform ./helm/microservices-platform \
+            --namespace staging \
+            --create-namespace \
+            --values ./helm/microservices-platform/values-staging.yaml \
+            --set image.tag=${{ github.sha }} \
+            --wait
+      
+      - name: Run smoke tests
+        run: |
+          kubectl run smoke-test --image=curlimages/curl:latest --rm -i --restart=Never -- \
+            curl -f http://api-gateway.staging.svc.cluster.local/health
+
+  # Deploy to production
+  deploy-production:
+    needs: [build-services, infrastructure-validation, integration-tests]
+    if: github.ref == 'refs/heads/main' && success()
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+      
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name production-cluster --region us-west-2
+      
+      - name: Blue-Green Deployment
+        run: |
+          # Deploy to green environment
+          helm upgrade --install microservices-platform-green ./helm/microservices-platform \
+            --namespace production \
+            --create-namespace \
+            --values ./helm/microservices-platform/values-production.yaml \
+            --set image.tag=${{ github.sha }} \
+            --set service.name=microservices-platform-green \
+            --wait
+          
+          # Health check
+          kubectl run health-check --image=curlimages/curl:latest --rm -i --restart=Never -- \
+            curl -f http://api-gateway-green.production.svc.cluster.local/health
+          
+          # Switch traffic (this would be done via service mesh or ingress controller)
+          kubectl patch service microservices-platform -p '{"spec":{"selector":{"app":"microservices-platform-green"}}}'
+          
+          # Wait and then cleanup old deployment
+          sleep 300
+          helm uninstall microservices-platform-blue --namespace production || true
+
+  # Notification
+  notify:
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()
