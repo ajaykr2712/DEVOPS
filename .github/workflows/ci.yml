@@ -1,0 +1,136 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Terraform validation
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+    
+    - name: Terraform Format Check
+      run: terraform fmt -check -recursive
+      working-directory: ./infrastructure
+    
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./infrastructure
+    
+    - name: Terraform Validate
+      run: terraform validate
+      working-directory: ./infrastructure
+
+  # Python scripts validation
+  python-validation:
+    name: Python Code Quality
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest black isort
+        if [ -f automation/requirements.txt ]; then pip install -r automation/requirements.txt; fi
+    
+    - name: Code formatting check
+      run: |
+        black --check automation/
+        isort --check-only automation/
+    
+    - name: Lint with flake8
+      run: |
+        flake8 automation/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 automation/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Test with pytest
+      run: |
+        pytest automation/tests/ -v
+
+  # Go code validation
+  go-validation:
+    name: Go Code Quality
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.19'
+    
+    - name: Go mod tidy
+      run: |
+        cd automation/go-tools
+        go mod tidy
+    
+    - name: Go vet
+      run: |
+        cd automation/go-tools
+        go vet ./...
+    
+    - name: Go test
+      run: |
+        cd automation/go-tools
+        go test ./...
+
+  # Documentation validation
+  docs-validation:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check Markdown links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        use-verbose-mode: 'yes'
+        config-file: '.markdown-link-check.json'
+
+  # Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Notification
+  notify-success:
+    name: Notify Success
+    runs-on: ubuntu-latest
+    needs: [terraform-validate, python-validation, go-validation, docs-validation, security-scan]
+    if: success()
+    steps:
+    - name: Success notification
+      run: echo "✅ All checks passed successfully!"
