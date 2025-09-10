@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# DevOps Excellence Environment Setup Script
-# This script sets up the development environment for the DevOps Excellence repository
+# 🚀 DevOps Excellence Repository Setup Script
+# This script sets up a production-ready DevOps repository with best practices
 
 set -euo pipefail
 
@@ -12,42 +12,33 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+# Script configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+LOG_FILE="${REPO_ROOT}/setup.log"
+
+# Utility functions
+log() {
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}" | tee -a "$LOG_FILE"
 }
 
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+warn() {
+    echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING: $1${NC}" | tee -a "$LOG_FILE"
 }
 
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+error() {
+    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}" | tee -a "$LOG_FILE"
+    exit 1
 }
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+info() {
+    echo -e "${BLUE}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}" | tee -a "$LOG_FILE"
 }
 
 # Check if command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
-
-# Install packages based on OS
-install_package() {
-    local package=$1
-    
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        if command_exists apt-get; then
-            sudo apt-get update && sudo apt-get install -y "$package"
-        elif command_exists yum; then
-            sudo yum install -y "$package"
-        elif command_exists dnf; then
-            sudo dnf install -y "$package"
-        else
-            log_error "Unsupported Linux distribution"
-            return 1
         fi
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         if command_exists brew; then

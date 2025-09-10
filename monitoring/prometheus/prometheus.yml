@@ -2,11 +2,12 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'kubernetes'
+    cluster: 'devops-excellence'
     environment: 'production'
 
 rule_files:
   - "alerts/*.yml"
+  - "rules/*.yml"
 
 alerting:
   alertmanagers:
