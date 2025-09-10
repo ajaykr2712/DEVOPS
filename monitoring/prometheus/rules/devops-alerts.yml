@@ -1,0 +1,237 @@
+groups:
+  - name: infrastructure.rules
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.devops-excellence.com/high-cpu"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for more than 5 minutes on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.devops-excellence.com/high-memory"
+
+      # Disk Space Usage
+      - alert: DiskSpaceUsage
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage is above 85% on {{ $labels.instance }} at {{ $labels.mountpoint }}"
+          runbook_url: "https://runbooks.devops-excellence.com/high-disk"
+
+      # Critical Disk Space
+      - alert: CriticalDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: "Disk usage is above 95% on {{ $labels.instance }} at {{ $labels.mountpoint }}"
+          runbook_url: "https://runbooks.devops-excellence.com/critical-disk"
+
+      # High Load Average
+      - alert: HighLoadAverage
+        expr: node_load15 > (count(node_cpu_seconds_total{mode="idle"}) by (instance)) * 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High load average on {{ $labels.instance }}"
+          description: "Load average is high on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.devops-excellence.com/high-load"
+
+  - name: kubernetes.rules
+    rules:
+      # Pod Restart Frequency
+      - alert: PodRestartingTooOften
+        expr: rate(kube_pod_container_status_restarts_total[1h]) * 3600 > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: kubernetes
+        annotations:
+          summary: "Pod {{ $labels.pod }} is restarting too often"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting more than 5 times per hour"
+          runbook_url: "https://runbooks.devops-excellence.com/pod-restarts"
+
+      # Pod Not Ready
+      - alert: PodNotReady
+        expr: kube_pod_status_ready{condition="false"} == 1
+        for: 10m
+        labels:
+          severity: warning
+          category: kubernetes
+        annotations:
+          summary: "Pod {{ $labels.pod }} not ready"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been not ready for more than 10 minutes"
+          runbook_url: "https://runbooks.devops-excellence.com/pod-not-ready"
+
+      # Deployment Replica Mismatch
+      - alert: DeploymentReplicasMismatch
+        expr: kube_deployment_spec_replicas != kube_deployment_status_available_replicas
+        for: 15m
+        labels:
+          severity: warning
+          category: kubernetes
+        annotations:
+          summary: "Deployment {{ $labels.deployment }} replica mismatch"
+          description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has mismatched replicas for more than 15 minutes"
+          runbook_url: "https://runbooks.devops-excellence.com/replica-mismatch"
+
+      # Node Not Ready
+      - alert: NodeNotReady
+        expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          category: kubernetes
+        annotations:
+          summary: "Node {{ $labels.node }} not ready"
+          description: "Node {{ $labels.node }} has been not ready for more than 5 minutes"
+          runbook_url: "https://runbooks.devops-excellence.com/node-not-ready"
+
+      # High Pod CPU Usage
+      - alert: HighPodCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          category: kubernetes
+        annotations:
+          summary: "High CPU usage in pod {{ $labels.pod }}"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using more than 80% CPU"
+          runbook_url: "https://runbooks.devops-excellence.com/high-pod-cpu"
+
+      # High Pod Memory Usage
+      - alert: HighPodMemoryUsage
+        expr: container_memory_usage_bytes{container!="POD",container!=""} / container_spec_memory_limit_bytes * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          category: kubernetes
+        annotations:
+          summary: "High memory usage in pod {{ $labels.pod }}"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is using more than 85% of its memory limit"
+          runbook_url: "https://runbooks.devops-excellence.com/high-pod-memory"
+
+  - name: application.rules
+    rules:
+      # High Application Error Rate
+      - alert: HighApplicationErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "High error rate in {{ $labels.service }}"
+          description: "Service {{ $labels.service }} has an error rate above 5% for more than 5 minutes"
+          runbook_url: "https://runbooks.devops-excellence.com/high-error-rate"
+
+      # High Application Response Time
+      - alert: HighApplicationResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "High response time in {{ $labels.service }}"
+          description: "Service {{ $labels.service }} 95th percentile response time is above 1 second"
+          runbook_url: "https://runbooks.devops-excellence.com/high-response-time"
+
+      # Service Down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on {{ $labels.instance }} is down"
+          runbook_url: "https://runbooks.devops-excellence.com/service-down"
+
+      # Database Connection Issues
+      - alert: DatabaseConnectionIssues
+        expr: mysql_up == 0 or postgres_up == 0 or redis_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "Database connection issues"
+          description: "Database {{ $labels.job }} on {{ $labels.instance }} is not responding"
+          runbook_url: "https://runbooks.devops-excellence.com/database-down"
+
+  - name: security.rules
+    rules:
+      # Too Many Failed Login Attempts
+      - alert: TooManyFailedLogins
+        expr: rate(failed_login_attempts_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Too many failed login attempts"
+          description: "More than 10 failed login attempts per minute detected"
+          runbook_url: "https://runbooks.devops-excellence.com/failed-logins"
+
+      # Suspicious Network Activity
+      - alert: SuspiciousNetworkActivity
+        expr: rate(network_connections_total{state="ESTABLISHED"}[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Suspicious network activity detected"
+          description: "High number of network connections detected on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.devops-excellence.com/suspicious-network"
+
+  - name: cost-optimization.rules
+    rules:
+      # Underutilized Resources
+      - alert: UnderutilizedCPU
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[24h])) * 100) < 20
+        for: 6h
+        labels:
+          severity: info
+          category: cost-optimization
+        annotations:
+          summary: "Underutilized CPU on {{ $labels.instance }}"
+          description: "CPU utilization is below 20% for more than 6 hours on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.devops-excellence.com/underutilized-cpu"
+
+      - alert: UnderutilizedMemory
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 < 30
+        for: 6h
+        labels:
+          severity: info
+          category: cost-optimization
+        annotations:
+          summary: "Underutilized memory on {{ $labels.instance }}"
+          description: "Memory utilization is below 30% for more than 6 hours on {{ $labels.instance }}"
+          runbook_url: "https://runbooks.devops-excellence.com/underutilized-memory"
